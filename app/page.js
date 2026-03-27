@@ -1,133 +1,163 @@
 'use client'
 
-import { useState } from 'react'
-import { supabase } from '../../lib/supabase'
+import { useEffect, useState } from 'react'
+import { supabase } from '../lib/supabase'
 
-export default function SignupPage() {
-  const [name, setName] = useState('')
+export default function Page() {
   const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [department, setDepartment] = useState('')
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
+  const [user, setUser] = useState(null)
+  const [authorized, setAuthorized] = useState(null)
+  const [checking, setChecking] = useState(true)
 
-  async function handleSignup() {
-    setMessage('')
+  useEffect(() => {
+    handleAuth()
 
-    const cleanName = name.trim()
-    const cleanEmail = email.trim().toLowerCase()
-    const cleanPassword = password.trim()
-    const cleanDepartment = department.trim()
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(() => {
+      checkUser()
+    })
 
-    if (!cleanName || !cleanEmail || !cleanPassword || !cleanDepartment) {
-      setMessage('Please complete all fields.')
+    return () => subscription.unsubscribe()
+  }, [])
+
+  async function handleAuth() {
+    setChecking(true)
+
+    const url = new URL(window.location.href)
+    const code = url.searchParams.get('code')
+
+    if (code) {
+      await supabase.auth.exchangeCodeForSession(code)
+      window.history.replaceState({}, document.title, '/')
+    }
+
+    await checkUser()
+    setChecking(false)
+  }
+
+  async function checkUser() {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    setUser(user)
+
+    if (!user?.email) {
+      setAuthorized(null)
       return
     }
 
-    if (cleanPassword.length < 6) {
-      setMessage('Password must be at least 6 characters.')
+    const { data, error } = await supabase
+      .from('referral_doctors')
+      .select('id, full_name, role')
+      .eq('email', user.email.toLowerCase())
+      .maybeSingle()
+
+    if (error || !data) {
+      setAuthorized(false)
+    } else {
+      setAuthorized(true)
+    }
+  }
+
+  async function login() {
+    setMessage('')
+
+    if (!email.trim()) {
+      setMessage('Please enter your email')
       return
     }
 
     setLoading(true)
 
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email: cleanEmail,
-        password: cleanPassword,
-      })
+    const { error } = await supabase.auth.signInWithOtp({
+      email: email.trim().toLowerCase(),
+      options: {
+        emailRedirectTo: window.location.origin,
+      },
+    })
 
-      if (error) {
-        setMessage(error.message)
-        setLoading(false)
-        return
-      }
-
-      const userId = data?.user?.id
-
-      if (!userId) {
-        setMessage('Account created, but no user ID returned.')
-        setLoading(false)
-        return
-      }
-
-      const { error: profileError } = await supabase
-        .from('referral_doctors')
-        .insert([
-          {
-            auth_user_id: userId,
-            email: cleanEmail,
-            name: cleanName,
-            department: cleanDepartment,
-            role: 'doctor',
-          },
-        ])
-
-      if (profileError) {
-        setMessage(profileError.message)
-        setLoading(false)
-        return
-      }
-
-      setMessage('Account created successfully. You can now log in.')
-      setName('')
-      setEmail('')
-      setPassword('')
-      setDepartment('')
-    } catch {
-      setMessage('Something went wrong.')
+    if (error) {
+      setMessage(error.message)
+    } else {
+      setMessage('Magic link sent. Check your email.')
     }
 
     setLoading(false)
+  }
+
+  async function logout() {
+    await supabase.auth.signOut()
+    setUser(null)
+    setAuthorized(null)
+    setMessage('')
+  }
+
+  if (checking) {
+    return (
+      <main className="page">
+        <div className="container">
+          <div className="card">
+            <h1>Al Lith Referral</h1>
+            <div className="message">Checking login...</div>
+          </div>
+        </div>
+      </main>
+    )
+  }
+
+  if (user && authorized === true) {
+    return (
+      <main className="page">
+        <div className="container">
+          <div className="card">
+            <h1>Al Lith Referral</h1>
+            <p className="small">Signed in as {user.email}</p>
+            <div className="message">Authorized user. Dashboard will be built next.</div>
+            <button onClick={logout}>Logout</button>
+          </div>
+        </div>
+      </main>
+    )
+  }
+
+  if (user && authorized === false) {
+    return (
+      <main className="page">
+        <div className="container">
+          <div className="card">
+            <h1>Al Lith Referral</h1>
+            <div className="message">This email is not authorized.</div>
+            <button onClick={logout}>Logout</button>
+          </div>
+        </div>
+      </main>
+    )
   }
 
   return (
     <main className="page">
       <div className="container">
         <div className="card">
-          <h1>Doctor Sign Up</h1>
-
-          <label>Name</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Your name"
-          />
+          <h1>Al Lith Referral</h1>
+          <p className="small">Sign in with your approved email address.</p>
 
           <label>Email</label>
           <input
             type="email"
+            placeholder="name@email.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="name@email.com"
           />
 
-          <label>Password</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
-          />
-
-          <label>Department</label>
-          <input
-            type="text"
-            value={department}
-            onChange={(e) => setDepartment(e.target.value)}
-            placeholder="e.g. Emergency, Internal Medicine"
-          />
-
-          <button onClick={handleSignup} disabled={loading}>
-            {loading ? 'Creating account...' : 'Create Account'}
+          <button onClick={login} disabled={loading}>
+            {loading ? 'Sending...' : 'Send Magic Link'}
           </button>
 
           {message ? <div className="message">{message}</div> : null}
-
-          <div className="message" style={{ marginTop: '16px' }}>
-            Already have an account? <a href="/login">Login here</a>
-          </div>
         </div>
       </div>
     </main>
