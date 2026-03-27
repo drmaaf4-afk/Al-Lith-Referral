@@ -4,15 +4,12 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 
 export default function Page() {
-  const [email, setEmail] = useState('')
-  const [message, setMessage] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [user, setUser] = useState(null)
-  const [authorized, setAuthorized] = useState(null)
   const [checking, setChecking] = useState(true)
+  const [user, setUser] = useState(null)
+  const [profile, setProfile] = useState(null)
 
   useEffect(() => {
-    handleAuth()
+    checkUser()
 
     const {
       data: { subscription },
@@ -23,22 +20,9 @@ export default function Page() {
     return () => subscription.unsubscribe()
   }, [])
 
-  async function handleAuth() {
+  async function checkUser() {
     setChecking(true)
 
-    const url = new URL(window.location.href)
-    const code = url.searchParams.get('code')
-
-    if (code) {
-      await supabase.auth.exchangeCodeForSession(code)
-      window.history.replaceState({}, document.title, '/')
-    }
-
-    await checkUser()
-    setChecking(false)
-  }
-
-  async function checkUser() {
     const {
       data: { user },
     } = await supabase.auth.getUser()
@@ -46,54 +30,29 @@ export default function Page() {
     setUser(user)
 
     if (!user?.email) {
-      setAuthorized(null)
+      setProfile(null)
+      setChecking(false)
       return
     }
 
     const { data, error } = await supabase
       .from('referral_doctors')
-      .select('id, full_name, role')
+      .select('id, name, department, role, email')
       .eq('email', user.email.toLowerCase())
       .maybeSingle()
 
     if (error || !data) {
-      setAuthorized(false)
+      setProfile(null)
     } else {
-      setAuthorized(true)
-    }
-  }
-
-  async function login() {
-    setMessage('')
-
-    if (!email.trim()) {
-      setMessage('Please enter your email')
-      return
+      setProfile(data)
     }
 
-    setLoading(true)
-
-    const { error } = await supabase.auth.signInWithOtp({
-      email: email.trim().toLowerCase(),
-      options: {
-        emailRedirectTo: window.location.origin,
-      },
-    })
-
-    if (error) {
-      setMessage(error.message)
-    } else {
-      setMessage('Magic link sent. Check your email.')
-    }
-
-    setLoading(false)
+    setChecking(false)
   }
 
   async function logout() {
     await supabase.auth.signOut()
-    setUser(null)
-    setAuthorized(null)
-    setMessage('')
+    window.location.href = '/login'
   }
 
   if (checking) {
@@ -109,28 +68,38 @@ export default function Page() {
     )
   }
 
-  if (user && authorized === true) {
+  if (!user) {
     return (
       <main className="page">
         <div className="container">
           <div className="card">
             <h1>Al Lith Referral</h1>
-            <p className="small">Signed in as {user.email}</p>
-            <div className="message">Authorized user. Dashboard will be built next.</div>
-            <button onClick={logout}>Logout</button>
+            <div className="message">You are not logged in.</div>
+
+            <a href="/login">
+              <button>Login</button>
+            </a>
+
+            <div style={{ height: '12px' }} />
+
+            <a href="/signup">
+              <button>Create Account</button>
+            </a>
           </div>
         </div>
       </main>
     )
   }
 
-  if (user && authorized === false) {
+  if (!profile) {
     return (
       <main className="page">
         <div className="container">
           <div className="card">
             <h1>Al Lith Referral</h1>
-            <div className="message">This email is not authorized.</div>
+            <div className="message">
+              Your account is signed in, but no doctor profile was found.
+            </div>
             <button onClick={logout}>Logout</button>
           </div>
         </div>
@@ -143,21 +112,24 @@ export default function Page() {
       <div className="container">
         <div className="card">
           <h1>Al Lith Referral</h1>
-          <p className="small">Sign in with your approved email address.</p>
 
-          <label>Email</label>
-          <input
-            type="email"
-            placeholder="name@email.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+          <div className="message">
+            <strong>Name:</strong> {profile.name}
+            <br />
+            <strong>Email:</strong> {profile.email}
+            <br />
+            <strong>Department:</strong> {profile.department}
+            <br />
+            <strong>Role:</strong> {profile.role}
+          </div>
 
-          <button onClick={login} disabled={loading}>
-            {loading ? 'Sending...' : 'Send Magic Link'}
-          </button>
+          <div className="message">
+            Logged in successfully.
+            <br />
+            Next step: Duty planner.
+          </div>
 
-          {message ? <div className="message">{message}</div> : null}
+          <button onClick={logout}>Logout</button>
         </div>
       </div>
     </main>
