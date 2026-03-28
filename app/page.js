@@ -35,18 +35,13 @@ export default function Page() {
       return
     }
 
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('referral_doctors')
       .select('id, name, department, role, email')
       .eq('email', user.email.toLowerCase())
       .maybeSingle()
 
-    if (error || !data) {
-      setProfile(null)
-    } else {
-      setProfile(data)
-    }
-
+    setProfile(data || null)
     setChecking(false)
   }
 
@@ -123,11 +118,11 @@ export default function Page() {
             <strong>Role:</strong> {profile.role}
           </div>
 
-          <div className="message">
-            Logged in successfully.
-            <br />
-            Next step: Duty planner.
-          </div>
+          <a href="/planner">
+            <button>Open Duty Planner</button>
+          </a>
+
+          <div style={{ height: '12px' }} />
 
           <button onClick={logout}>Logout</button>
         </div>
