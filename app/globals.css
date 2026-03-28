@@ -1,3 +1,134 @@
+/* ============================= /
+/ RESET /
+/ ============================= /
+html, body {
+  padding: 0;
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #eef3fb;
+  color: #1f2937;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/ ============================= /
+/ LAYOUT /
+/ ============================= /
+.page {
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.container {
+  max-width: 720px;
+  margin: 40px auto;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+}
+
+/ ============================= /
+/ TEXT /
+/ ============================= /
+h1 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  text-align: center;
+  color: #243b7c;
+}
+
+h2 {
+  margin: 10px 0;
+}
+
+p {
+  line-height: 1.6;
+}
+
+.small {
+  font-size: 14px;
+  color: #475569;
+  text-align: center;
+}
+
+/ ============================= /
+/ FORM /
+/ ============================= /
+label {
+  display: block;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+input, select {
+  width: 100%;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  margin-top: 8px;
+  margin-bottom: 14px;
+  font-size: 16px;
+  background: #ffffff;
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: #243b7c;
+}
+
+button {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  background: #243b7c;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/ ============================= /
+/ MESSAGE BOX /
+/ ============================= /
+.message {
+  margin-top: 14px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #f1f5f9;
+  text-align: center;
+}
+
+/ ============================= /
+/ LINKS /
+/ ============================= /
+a {
+  color: #243b7c;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/ ============================= /
+/ PLANNER NAV /
+/ ============================= /
 .planner-nav {
   display: flex;
   align-items: center;
@@ -13,6 +144,9 @@
   flex: 1;
 }
 
+/ ============================= /
+/ PLANNER LIST /
+/ ============================= /
 .planner-list {
   display: flex;
   flex-direction: column;
@@ -20,6 +154,9 @@
   margin-top: 16px;
 }
 
+/ ============================= /
+/ DAY CARD /
+/ ============================= /
 .day-card {
   border: 1px solid #d8dee9;
   border-radius: 12px;
@@ -27,6 +164,9 @@
   background: #f8fafc;
 }
 
+/ ============================= /
+/ DAY HEADER /
+/ ============================= /
 .day-header {
   display: flex;
   justify-content: space-between;
@@ -40,12 +180,53 @@
   color: #334155;
 }
 
+/ ============================= /
+/ DOCTOR LIST /
+/ ============================= /
 .day-doctors {
   margin-bottom: 10px;
   line-height: 1.7;
 }
 
+/ ============================= /
+/ STATUS /
+/ ============================= /
 .day-status {
   margin-bottom: 12px;
   font-weight: bold;
+}
+
+/ ============================= /
+/ STATUS COLORS /
+/ ============================= /
+.status-open {
+  color: #16a34a;
+}
+
+.status-full {
+  color: #dc2626;
+}
+
+/ ============================= /
+/ SMALL BUTTONS /
+/ ============================= /
+.btn-small {
+  padding: 8px 12px;
+  font-size: 14px;
+  border-radius: 8px;
+  width: auto;
+}
+
+/ ============================= /
+/ RESPONSIVE /
+/ ============================= */
+@media (max-width: 600px) {
+  .container {
+    margin: 20px auto;
+    padding: 0 10px;
+  }
+
+  .card {
+    padding: 16px;
+  }
 }
