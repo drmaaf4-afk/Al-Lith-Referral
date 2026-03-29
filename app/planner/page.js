@@ -42,6 +42,7 @@ export default function PlannerPage() {
   const [user, setUser] = useState(null)
   const [profile, setProfile] = useState(null)
   const [scheduleMap, setScheduleMap] = useState({})
+  const [doctorNameMap, setDoctorNameMap] = useState({})
   const [loading, setLoading] = useState(true)
   const [busyDate, setBusyDate] = useState('')
   const [message, setMessage] = useState('')
@@ -57,6 +58,7 @@ export default function PlannerPage() {
 
   useEffect(() => {
     if (user?.email) {
+      loadDoctors()
       loadSchedule()
     }
   }, [user, currentYear, currentMonth])
@@ -77,8 +79,8 @@ export default function PlannerPage() {
 
     const { data: doctor } = await supabase
       .from('referral_doctors')
-      .select('id, name, department, role, email')
-      .eq('email', user.email.toLowerCase())
+      .select('id, auth_user_id, name, department, role, email')
+      .eq('auth_user_id', user.id)
       .maybeSingle()
 
     if (!doctor) {
@@ -88,6 +90,23 @@ export default function PlannerPage() {
 
     setProfile(doctor)
     setLoading(false)
+  }
+
+  async function loadDoctors() {
+    const { data, error } = await supabase
+      .from('referral_doctors')
+      .select('email, name')
+
+    if (error) {
+      setMessage(error.message)
+      return
+    }
+
+    const map = {}
+    for (const doctor of data || []) {
+      map[doctor.email.toLowerCase()] = doctor.name
+    }
+    setDoctorNameMap(map)
   }
 
   async function loadSchedule() {
@@ -123,12 +142,15 @@ export default function PlannerPage() {
     const existing = scheduleMap[dutyDate]
 
     if (!existing) {
-      const { error } = await supabase.from('duty_schedule').insert([
-        {
-          duty_date: dutyDate,
-          doctor_1_email: email,
-        },
-      ])
+      const { error } = await supabase
+        .from('duty_schedule')
+        .insert([
+          {
+            duty_date: dutyDate,
+            doctor_1_email: email,
+            doctor_2_email: null,
+          },
+        ])
 
       if (error) {
         setMessage(error.message)
@@ -196,14 +218,26 @@ export default function PlannerPage() {
       return
     }
 
-    let updates = {}
-
     if (d1 === email && d2) {
-      updates = {
-        doctor_1_email: existing.doctor_2_email,
-        doctor_2_email: null,
+      const { error } = await supabase
+        .from('duty_schedule')
+        .update({
+          doctor_1_email: existing.doctor_2_email,
+          doctor_2_email: null,
+        })
+        .eq('id', existing.id)
+
+      if (error) {
+        setMessage(error.message)
+      } else {
+        await loadSchedule()
       }
-    } else if (d1 === email && !d2) {
+
+      setBusyDate('')
+      return
+    }
+
+    if (d1 === email && !d2) {
       const { error } = await supabase
         .from('duty_schedule')
         .delete()
@@ -217,21 +251,21 @@ export default function PlannerPage() {
 
       setBusyDate('')
       return
-    } else if (d2 === email) {
-      updates = {
-        doctor_2_email: null,
-      }
     }
 
-    const { error } = await supabase
-      .from('duty_schedule')
-      .update(updates)
-      .eq('id', existing.id)
+    if (d2 === email) {
+      const { error } = await supabase
+        .from('duty_schedule')
+        .update({
+          doctor_2_email: null,
+        })
+        .eq('id', existing.id)
 
-    if (error) {
-      setMessage(error.message)
-    } else {
-      await loadSchedule()
+      if (error) {
+        setMessage(error.message)
+      } else {
+        await loadSchedule()
+      }
     }
 
     setBusyDate('')
@@ -299,14 +333,11 @@ export default function PlannerPage() {
           <div className="planner-list">
             {monthDays.map((dutyDate) => {
               const row = scheduleMap[dutyDate]
-              const d1 = row?.doctor_1_email || '—'
-              const d2 = row?.doctor_2_email || '—'
-              const mine =
-                user?.email &&
-                [row?.doctor_1_email?.toLowerCase(), row?.doctor_2_email?.toLowerCase()].includes(
-                  user.email.toLowerCase()
-                )
-              const count = [row?.doctor_1_email, row?.doctor_2_email].filter(Boolean).length
+              const d1 = row?.doctor_1_email?.toLowerCase() || null
+              const d2 = row?.doctor_2_email?.toLowerCase() || null
+              const myEmail = user?.email?.toLowerCase() || ''
+              const mine = d1 === myEmail || d2 === myEmail
+              const count = [d1, d2].filter(Boolean).length
               const full = count >= 2
 
               return (
@@ -319,11 +350,17 @@ export default function PlannerPage() {
                   <div className="day-time">08:00 → next day 08:00</div>
 
                   <div className="day-doctors">
-                    <div>Doctor 1: {d1}</div>
-                    <div>Doctor 2: {d2}</div>
+                    <div>
+                      Doctor 1:{' '}
+                      {d1 ? doctorNameMap[d1] || d1 : '—'}
+                    </div>
+                    <div>
+                      Doctor 2:{' '}
+                      {d2 ? doctorNameMap[d2] || d2 : '—'}
+                    </div>
                   </div>
 
-                  <div className="day-status">
+                  <div className={`day-status ${full ? 'status-full' : 'status-open'}`}>
                     Status: {count}/2 {full ? 'FULL' : 'available'}
                   </div>
 
