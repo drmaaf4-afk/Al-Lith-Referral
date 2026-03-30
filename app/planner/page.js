@@ -351,17 +351,15 @@ export default function PlannerPage() {
 
                   <div className="day-doctors">
                     <div>
-                      Doctor 1:{' '}
-                      {d1 ? doctorNameMap[d1] || d1 : '—'}
+                      Doctor 1: {d1 ? doctorNameMap[d1] || d1 : '—'}
                     </div>
                     <div>
-                      Doctor 2:{' '}
-                      {d2 ? doctorNameMap[d2] || d2 : '—'}
+                      Doctor 2: {d2 ? doctorNameMap[d2] || d2 : '—'}
                     </div>
                   </div>
 
                   <div className={`day-status ${full ? 'status-full' : 'status-open'}`}>
-                    Status: {count}/2 {full ? 'FULL' : 'available'}
+                    {full ? 'Full - no slot available' : 'Available - booking open'}
                   </div>
 
                   {mine ? (
