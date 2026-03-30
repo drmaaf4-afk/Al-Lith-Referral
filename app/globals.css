@@ -1,6 +1,6 @@
-/* ============================= /
-/ RESET /
-/ ============================= /
+/* ============================= */
+/* RESET */
+/* ============================= */
 html, body {
   padding: 0;
   margin: 0;
@@ -13,9 +13,45 @@ html, body {
   box-sizing: border-box;
 }
 
-/ ============================= /
-/ LAYOUT /
-/ ============================= /
+/* ============================= */
+/* HEADER */
+/* ============================= */
+.app-header {
+  background: #15508A;
+  padding: 18px 16px;
+  text-align: center;
+  color: white;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.header-logo {
+  width: 110px;
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto 10px auto;
+}
+
+.header-ar {
+  font-size: 28px;
+  font-weight: bold;
+  direction: rtl;
+  margin-bottom: 4px;
+}
+
+.header-en {
+  font-size: 22px;
+  font-weight: bold;
+  opacity: 0.95;
+}
+
+.app-container {
+  padding: 16px;
+}
+
+/* ============================= */
+/* LAYOUT */
+/* ============================= */
 .page {
   min-height: 100vh;
   padding: 20px;
@@ -33,9 +69,9 @@ html, body {
   box-shadow: 0 6px 20px rgba(0,0,0,0.08);
 }
 
-/ ============================= /
-/ TEXT /
-/ ============================= /
+/* ============================= */
+/* TEXT */
+/* ============================= */
 h1 {
   margin-top: 0;
   margin-bottom: 10px;
@@ -57,9 +93,9 @@ p {
   text-align: center;
 }
 
-/ ============================= /
-/ FORM /
-/ ============================= /
+/* ============================= */
+/* FORM */
+/* ============================= */
 label {
   display: block;
   margin-top: 10px;
@@ -103,9 +139,9 @@ button:disabled {
   cursor: not-allowed;
 }
 
-/ ============================= /
-/ MESSAGE BOX /
-/ ============================= /
+/* ============================= */
+/* MESSAGE BOX */
+/* ============================= */
 .message {
   margin-top: 14px;
   padding: 12px;
@@ -114,9 +150,9 @@ button:disabled {
   text-align: center;
 }
 
-/ ============================= /
-/ LINKS /
-/ ============================= /
+/* ============================= */
+/* LINKS */
+/* ============================= */
 a {
   color: #243b7c;
   text-decoration: none;
@@ -126,9 +162,21 @@ a:hover {
   text-decoration: underline;
 }
 
-/ ============================= /
-/ PLANNER NAV /
-/ ============================= /
+/* ============================= */
+/* PROFILE BOX */
+/* ============================= */
+.profile-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 16px;
+  line-height: 1.8;
+  margin-bottom: 16px;
+}
+
+/* ============================= */
+/* PLANNER NAV */
+/* ============================= */
 .planner-nav {
   display: flex;
   align-items: center;
@@ -144,9 +192,21 @@ a:hover {
   flex: 1;
 }
 
-/ ============================= /
-/ PLANNER LIST /
-/ ============================= /
+/* ============================= */
+/* PLANNER SUMMARY */
+/* ============================= */
+.planner-summary {
+  background: #eef4ff;
+  border: 1px solid #dbe7ff;
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  line-height: 1.7;
+}
+
+/* ============================= */
+/* PLANNER LIST */
+/* ============================= */
 .planner-list {
   display: flex;
   flex-direction: column;
@@ -154,9 +214,9 @@ a:hover {
   margin-top: 16px;
 }
 
-/ ============================= /
-/ DAY CARD /
-/ ============================= /
+/* ============================= */
+/* DAY CARD */
+/* ============================= */
 .day-card {
   border: 1px solid #d8dee9;
   border-radius: 12px;
@@ -164,9 +224,9 @@ a:hover {
   background: #f8fafc;
 }
 
-/ ============================= /
-/ DAY HEADER /
-/ ============================= /
+/* ============================= */
+/* DAY HEADER */
+/* ============================= */
 .day-header {
   display: flex;
   justify-content: space-between;
@@ -175,30 +235,49 @@ a:hover {
   flex-wrap: wrap;
 }
 
+.day-name {
+  font-size: 20px;
+  font-weight: bold;
+  color: #111827;
+}
+
+.day-date {
+  color: #64748b;
+  font-size: 14px;
+}
+
 .day-time {
   margin-bottom: 10px;
   color: #334155;
 }
 
-/ ============================= /
-/ DOCTOR LIST /
-/ ============================= /
+/* ============================= */
+/* DOCTOR LIST */
+/* ============================= */
 .day-doctors {
   margin-bottom: 10px;
   line-height: 1.7;
 }
 
-/ ============================= /
-/ STATUS /
-/ ============================= /
+.doctor-line {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+}
+
+/* ============================= */
+/* STATUS */
+/* ============================= */
 .day-status {
   margin-bottom: 12px;
   font-weight: bold;
 }
 
-/ ============================= /
-/ STATUS COLORS /
-/ ============================= /
+/* ============================= */
+/* STATUS COLORS */
+/* ============================= */
 .status-open {
   color: #16a34a;
 }
@@ -207,9 +286,9 @@ a:hover {
   color: #dc2626;
 }
 
-/ ============================= /
-/ SMALL BUTTONS /
-/ ============================= /
+/* ============================= */
+/* SMALL BUTTONS */
+/* ============================= */
 .btn-small {
   padding: 8px 12px;
   font-size: 14px;
@@ -217,9 +296,18 @@ a:hover {
   width: auto;
 }
 
-/ ============================= /
-/ RESPONSIVE /
-/ ============================= */
+.actions-row {
+  display: flex;
+  gap: 10px;
+}
+
+.actions-row button {
+  width: 100%;
+}
+
+/* ============================= */
+/* RESPONSIVE */
+/* ============================= */
 @media (max-width: 600px) {
   .container {
     margin: 20px auto;
@@ -228,5 +316,26 @@ a:hover {
 
   .card {
     padding: 16px;
+  }
+
+  .header-logo {
+    width: 85px;
+  }
+
+  .header-ar {
+    font-size: 22px;
+  }
+
+  .header-en {
+    font-size: 18px;
+  }
+
+  .planner-nav {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .planner-title {
+    order: -1;
   }
 }
