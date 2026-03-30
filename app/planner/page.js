@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import * as XLSX from 'xlsx'
 import { supabase } from '../../lib/supabase'
 
 function formatDate(date) {
@@ -289,6 +290,59 @@ export default function PlannerPage() {
     }
   }
 
+  function exportExcel() {
+    const plannerRows = monthDays.map((dutyDate) => {
+      const row = scheduleMap[dutyDate]
+      const d1 = row?.doctor_1_email?.toLowerCase() || ''
+      const d2 = row?.doctor_2_email?.toLowerCase() || ''
+
+      return {
+        Date: dutyDate,
+        Day: dayLabel(dutyDate),
+        'Doctor 1': d1 ? doctorNameMap[d1] || d1 : '',
+        'Doctor 2': d2 ? doctorNameMap[d2] || d2 : '',
+      }
+    })
+
+    const dutyCountMap = {}
+
+    monthDays.forEach((dutyDate) => {
+      const row = scheduleMap[dutyDate]
+      const d1 = row?.doctor_1_email?.toLowerCase()
+      const d2 = row?.doctor_2_email?.toLowerCase()
+
+      if (d1) {
+        const name1 = doctorNameMap[d1] || d1
+        dutyCountMap[name1] = (dutyCountMap[name1] || 0) + 1
+      }
+
+      if (d2) {
+        const name2 = doctorNameMap[d2] || d2
+        dutyCountMap[name2] = (dutyCountMap[name2] || 0) + 1
+      }
+    })
+
+    const summaryRows = Object.keys(dutyCountMap)
+      .sort((a, b) => a.localeCompare(b))
+      .map((doctor) => ({
+        Doctor: doctor,
+        'Number of Duties': dutyCountMap[doctor],
+      }))
+
+    const workbook = XLSX.utils.book_new()
+
+    const plannerSheet = XLSX.utils.json_to_sheet(plannerRows)
+    const summarySheet = XLSX.utils.json_to_sheet(summaryRows)
+
+    XLSX.utils.book_append_sheet(workbook, plannerSheet, 'Planner')
+    XLSX.utils.book_append_sheet(workbook, summarySheet, 'Summary')
+
+    XLSX.writeFile(
+      workbook,
+      `duty-planner-${currentYear}-${String(currentMonth + 1).padStart(2, '0')}.xlsx`
+    )
+  }
+
   if (loading) {
     return (
       <main className="page">
@@ -320,6 +374,10 @@ export default function PlannerPage() {
             <button onClick={previousMonth}>Previous</button>
             <div className="planner-title">{monthLabel(currentYear, currentMonth)}</div>
             <button onClick={nextMonth}>Next</button>
+          </div>
+
+          <div style={{ marginBottom: '16px' }}>
+            <button onClick={exportExcel}>Export Excel</button>
           </div>
 
           <div className="message">
